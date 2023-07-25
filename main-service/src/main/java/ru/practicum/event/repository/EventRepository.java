@@ -21,7 +21,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "FROM Event AS e " +
             "WHERE " +
             "(" +
-            ":text IS NULL " +
+            "?1 IS NULL " +
             "OR LOWER(e.description) LIKE CONCAT('%', ?1, '%') " +
             "OR LOWER(e.annotation) LIKE CONCAT('%', ?1, '%')" +
             ")" +
