@@ -100,7 +100,7 @@ public class EventServiceImpl implements EventService {
                     event.setState(State.CANCELED);
                     break;
                 case PUBLISH_EVENT:
-                    checkEventStatus(event, request, List.of(State.PENDING, State.CANCELED));
+                    checkEventStatus(event, request, List.of(State.PENDING));
                     event.setState(State.PUBLISHED);
                     event.setPublishedOn(LocalDateTime.now());
                     break;
@@ -317,19 +317,19 @@ public class EventServiceImpl implements EventService {
 
     private void checkDescription(UpdateEventRequest request) {
         if (request.getDescription().length() > DESCRIPTION_MAX || request.getDescription().length() > DESCRIPTION_MIN) {
-            throw new ValidationException("Can't be shorter than 20 and longer than 7000");
+            throw new ValidationException("Can't be shorter than " + DESCRIPTION_MIN + " and longer than " + DESCRIPTION_MAX);
         }
     }
 
     private void checkAnnotaion(UpdateEventRequest request) {
-        if (request.getAnnotation().length() > ANNOTATION_MAX || request.getAnnotation().length() > ANNOTATION_MIN) {
-            throw new ValidationException("Can't be shorter than 20 and longer than 2000");
+        if (request.getAnnotation().length() > ANNOTATION_MAX || request.getAnnotation().length() < ANNOTATION_MIN) {
+            throw new ValidationException("Can't be shorter than " + ANNOTATION_MIN + " and longer than " + ANNOTATION_MAX);
         }
     }
 
     private void checkTitle(UpdateEventRequest request) {
         if (request.getTitle().length() < TITLE_MIN || request.getTitle().length() > TITLE_MAX) {
-            throw new ValidationException("Can't be shorter than 3 and longer than 120");
+            throw new ValidationException("Can't be shorter than " + TITLE_MIN + " and longer than " + TITLE_MAX);
         }
     }
 
