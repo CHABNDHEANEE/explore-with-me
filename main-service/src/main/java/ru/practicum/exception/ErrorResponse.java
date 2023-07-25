@@ -1,13 +1,9 @@
 package ru.practicum.exception;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class ErrorResponse {
 
     String error;
-
-    public ErrorResponse(String error) {
-        this.error = error;
-    }
 }
