@@ -17,7 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByIdIn(List<Long> eventId);
 
-    @Query("SELECT e " +
+    @Query(value = "SELECT e " +
             "FROM Event AS e " +
             "WHERE " +
             "(" +
@@ -30,7 +30,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (?4 IS NULL OR e.paid = ?4) " +
             "AND (CAST(?5 AS date) IS NULL OR e.eventDate >= ?5) " +
             "AND (CAST(?6 AS date) IS NULL OR e.eventDate <= ?6) " +
-            "order by e.eventDate")
+            "order by e.eventDate",
+    nativeQuery = true)
     List<Event> findByParamsOrderByDate(
             String text,
             List<State> states,
@@ -40,14 +41,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             LocalDateTime rangeEnd,
             Pageable pageable);
 
-    @Query("SELECT e " +
+    @Query(value = "SELECT e " +
             "FROM Event AS e " +
             "WHERE (?1 IS NULL OR e.initiator.id IN (?1)) " +
             "AND (?2 IS NULL OR e.state IN (?2)) " +
             "AND (?3 IS NULL OR e.category.id IN (?3)) " +
             "AND (CAST(?4 AS date) IS NULL OR e.eventDate >= ?4) " +
             "AND (CAST(?5 AS date) IS NULL OR e.eventDate <= ?5) " +
-            "order by e.eventDate")
+            "order by e.eventDate",
+            nativeQuery = true)
     List<Event> findByParams(
             List<Long> users,
             List<State> states,
