@@ -316,19 +316,19 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDescription(UpdateEventRequest request) {
-        if (request.getDescription().length() > DESCRIPTION_MAX && request.getDescription().length() > DESCRIPTION_MIN) {
+        if (request.getDescription().length() > DESCRIPTION_MAX || request.getDescription().length() > DESCRIPTION_MIN) {
             throw new ValidationException("Can't be shorter than 20 and longer than 7000");
         }
     }
 
     private void checkAnnotaion(UpdateEventRequest request) {
-        if (request.getAnnotation().length() > ANNOTATION_MAX && request.getAnnotation().length() > ANNOTATION_MIN) {
+        if (request.getAnnotation().length() > ANNOTATION_MAX || request.getAnnotation().length() > ANNOTATION_MIN) {
             throw new ValidationException("Can't be shorter than 20 and longer than 2000");
         }
     }
 
     private void checkTitle(UpdateEventRequest request) {
-        if (request.getTitle().length() < TITLE_MIN && request.getTitle().length() > TITLE_MAX) {
+        if (request.getTitle().length() < TITLE_MIN || request.getTitle().length() > TITLE_MAX) {
             throw new ValidationException("Can't be shorter than 3 and longer than 120");
         }
     }
