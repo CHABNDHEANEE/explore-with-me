@@ -84,7 +84,8 @@ public class EventServiceImpl implements EventService {
         if (request.getEventDate() != null) {
             checkStartTime(request.getEventDate());
             event.setEventDate(request.getEventDate());
-
+        }
+        if (request.getStateAction() != null) {
             switch (request.getStateAction()) {
                 case REJECT_EVENT:
                     checkEventStatus(event, request, List.of(State.PENDING));
