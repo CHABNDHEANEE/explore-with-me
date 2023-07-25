@@ -27,10 +27,8 @@ public class PublicEventController {
     public List<EventShortDto> getAllEvents(@RequestParam(required = false) String text,
                                             @RequestParam(required = false) List<Long> categories,
                                             @RequestParam(required = false) Boolean paid,
-                                            @RequestParam(required = false)
-                                            @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeStart,
-                                            @RequestParam(required = false)
-                                            @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeEnd,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeStart,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeEnd,
                                             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                             @RequestParam(required = false) Sort sort,
                                             @PositiveOrZero @RequestParam(defaultValue = "0") int from,

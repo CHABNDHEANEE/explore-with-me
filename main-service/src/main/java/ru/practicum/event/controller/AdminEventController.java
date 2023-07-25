@@ -27,10 +27,8 @@ public class AdminEventController {
     public List<EventFullDto> get(@RequestParam(required = false) List<Long> users,
                                   @RequestParam(required = false) List<State> states,
                                   @RequestParam(required = false) List<Long> categoriesId,
-                                  @RequestParam(required = false)
-                                  @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeStart,
-                                  @RequestParam(required = false)
-                                  @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeEnd,
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeStart,
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = FORMATTER) LocalDateTime rangeEnd,
                                   @PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                   @Positive @RequestParam(defaultValue = "10") int size) {
         return eventService.findAllEventsByAdmin(users, states, categoriesId, rangeStart, rangeEnd,
