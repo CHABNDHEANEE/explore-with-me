@@ -3,6 +3,7 @@ package ru.practicum.compilation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
@@ -27,6 +28,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final ObjectCheckExistence checkExistence;
 
     @Override
+    @Transactional
     public CompilationDto addCompilationByAdmin(NewCompilationDto newCompilationDto) {
         List<Event> events = new ArrayList<>();
         if (newCompilationDto.getEvents() != null) {
@@ -47,6 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto updateCompilationByAdmin(Long compId, UpdateCompilationRequest request) {
         Compilation compilation = checkExistence.getCompilation(compId);
         if (request.getEvents() != null) {

@@ -3,6 +3,7 @@ package ru.practicum.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserShortDto;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements ru.practicum.user.service.UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(UserShortDto userShortDto) {
         Optional<User> userOpt = repository.findByName(userShortDto.getName());
         if (userOpt.isPresent()) {

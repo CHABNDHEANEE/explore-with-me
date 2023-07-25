@@ -3,6 +3,7 @@ package ru.practicum.category.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.model.Category;
@@ -19,13 +20,14 @@ import static ru.practicum.category.mapper.CategoryMapper.CATEGORY_MAPPER;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryServiceImpl implements ru.practicum.category.service.CategoryService {
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
     private final ObjectCheckExistence checkExistence;
 
     @Override
+    @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         Optional<Category> cat = categoryRepository.findByName(newCategoryDto.getName());
         if (cat.isPresent()) {
@@ -37,6 +39,7 @@ public class CategoryServiceImpl implements ru.practicum.category.service.Catego
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
         Category category = checkExistence.getCategory(catId);
         Optional<Category> cat = categoryRepository.findByName(newCategoryDto.getName());

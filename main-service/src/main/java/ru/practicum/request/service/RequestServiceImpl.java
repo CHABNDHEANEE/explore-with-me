@@ -2,6 +2,7 @@ package ru.practicum.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
@@ -42,6 +43,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         User user = checkExistence.getUser(userId);
         Event event = checkExistence.getEvent(eventId);
@@ -80,12 +82,15 @@ public class RequestServiceImpl implements RequestService {
 
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         User user = checkExistence.getUser(userId);
         ParticipationRequest request = checkExistence.getRequest(requestId);
+
         if (!request.getRequester().equals(user)) {
             throw new ConflictException("You can canceled only your request");
         }
+
         request.setStatus(RequestStatus.CANCELED);
         return REQUEST_MAPPER.toParticipationRequestDto(requestRepository.save(request));
     }
@@ -105,6 +110,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequestsByUser(Long userId,
                                                                Long eventId,
                                                                EventRequestStatusUpdateRequest updateRequest) {

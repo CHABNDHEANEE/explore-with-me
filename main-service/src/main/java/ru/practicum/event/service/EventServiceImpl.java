@@ -81,6 +81,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request) {
         Event event = checkExistence.getEvent(eventId);
         if (request.getEventDate() != null) {
@@ -195,6 +196,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto addEventByUser(Long userId, NewEventDto newEventDto) {
         User user = checkExistence.getUser(userId);
 
@@ -228,6 +230,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEventByUser(Long userId,
                                           Long eventId,
                                           UpdateEventUserRequest request) {
