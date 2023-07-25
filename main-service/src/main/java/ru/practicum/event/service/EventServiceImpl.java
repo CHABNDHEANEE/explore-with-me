@@ -277,7 +277,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDate(UpdateEventRequest request) {
-        if (!request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
+        if (request != null && !request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
     }
@@ -305,19 +305,19 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDescription(UpdateEventRequest request) {
-        if (!(request.getDescription().length() <= 7000 && request.getDescription().length() >= 20)) {
+        if (request.getDescription().length() > 7000 && request.getDescription().length() > 20) {
             throw new ValidationException("Can't be shorter than 20 and longer than 7000");
         }
     }
 
     private void checkAnnotaion(UpdateEventRequest request) {
-        if (request.getAnnotation().length() <= 2000 && request.getAnnotation().length() >= 20) {
+        if (request.getAnnotation().length() > 2000 && request.getAnnotation().length() > 20) {
             throw new ValidationException("Can't be shorter than 20 and longer than 2000");
         }
     }
 
     private void checkTitle(UpdateEventRequest request) {
-        if (request.getTitle().length() >= 3 && request.getTitle().length() <= 120) {
+        if (request.getTitle().length() < 3 && request.getTitle().length() > 120) {
             throw new ValidationException("Can't be shorter than 3 and longer than 120");
         }
     }
