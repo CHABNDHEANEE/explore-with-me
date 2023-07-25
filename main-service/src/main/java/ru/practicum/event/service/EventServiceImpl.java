@@ -55,17 +55,13 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
         if (states == null) {
-            states = new ArrayList<>();
-            states.addAll(Stream.of(State.values())
-                    .collect(Collectors.toList()));
+            states = Stream.of(State.values())
+                    .collect(Collectors.toList());
         }
 
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now().minusYears(5);
-        }
-        if (rangeEnd == null) {
-            rangeEnd = LocalDateTime.now().plusYears(5);
-        }
+        rangeStart = rangeStart == null ? LocalDateTime.now().minusYears(5) : rangeStart;
+        rangeEnd = rangeEnd == null ? LocalDateTime.now().plusYears(5) : rangeEnd;
+
         checkExistence.getDateTime(rangeStart, rangeEnd);
         List<Event> events = eventRepository.findByParams(
                 users,
@@ -84,31 +80,24 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request) {
         Event event = checkExistence.getEvent(eventId);
+
         if (request.getEventDate() != null) {
-            if (LocalDateTime.now().isAfter(request.getEventDate())) {
-                throw new ValidationException("Start must be before the end");
-            } else {
-                event.setEventDate(request.getEventDate());
-            }
-        }
-        if (request.getStateAction() != null) {
-            if (request.getStateAction() == StateAction.PUBLISH_EVENT) {
-                if (event.getState().equals(State.PENDING)) {
+            checkStartTime(request.getEventDate());
+            event.setEventDate(request.getEventDate());
+
+            switch (request.getStateAction()) {
+                case REJECT_EVENT:
+                    checkEventStatus(event, request, List.of(State.PENDING));
+                    event.setState(State.CANCELED);
+                    break;
+                case PUBLISH_EVENT:
+                    checkEventStatus(event, request, List.of(State.PENDING, State.CANCELED));
                     event.setState(State.PUBLISHED);
                     event.setPublishedOn(LocalDateTime.now());
-                } else {
-                    throw new ConflictException("Event can be published only from pending status" +
-                            request.getStateAction());
-                }
-            }
-            if (request.getStateAction() == StateAction.REJECT_EVENT) {
-                if (event.getState().equals(State.PUBLISHED)) {
-                    throw new ConflictException("Event can be published only from pending status" +
-                            request.getStateAction());
-                }
-                event.setState(State.CANCELED);
+                    break;
             }
         }
+
         return EVENT_MAPPER.toEventFullDto(eventRepository.save(updateEvent(event, request)));
     }
 
@@ -123,18 +112,12 @@ public class EventServiceImpl implements EventService {
                                                      Sort sort,
                                                      Pageable pageable,
                                                      HttpServletRequest request) {
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
-        }
-        if (rangeEnd == null) {
-            rangeEnd = LocalDateTime.now().plusYears(5);
-        }
+
+        rangeStart = rangeStart == null ? LocalDateTime.now() : rangeStart;
+        rangeEnd = rangeEnd == null ? LocalDateTime.now() : rangeEnd;
+        text = text == null ? "" : text;
 
         checkExistence.getDateTime(rangeStart, rangeEnd);
-
-        if (text == null) {
-            text = "";
-        }
 
         List<Event> events = eventRepository.findByParamsOrderByDate(
                 text.toLowerCase(),
@@ -221,10 +204,7 @@ public class EventServiceImpl implements EventService {
         Event event = checkExistence.getEvent(eventId);
         User user = checkExistence.getUser(userId);
 
-        if (!event.getInitiator().equals(user)) {
-            throw new NotFoundException(String.format("User %s not the owner of the event %d",
-                    user.getName(), event.getId()));
-        }
+        checkEventOwner(event, user);
 
         return EVENT_MAPPER.toEventFullDto(event);
     }
@@ -237,60 +217,23 @@ public class EventServiceImpl implements EventService {
 
         Event event = EVENT_MAPPER.toEvent(findEventByUser(userId, eventId));
 
-        if (request.getEventDate() == null || request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
-            if (event.getState().equals(State.PUBLISHED)) {
-                throw new ConflictException("You can change only pending and canceled events");
-            }
-            if (StateAction.SEND_TO_REVIEW == request.getStateAction()) {
-                event.setState(State.PENDING);
-            }
-            if (StateAction.CANCEL_REVIEW == request.getStateAction()) {
-                event.setState(State.CANCELED);
-            }
-        } else {
-            throw new ValidationException("Datetime of the event must be in two hours from now");
+        checkEventStatus(event, request, List.of(State.PENDING, State.CANCELED));
+
+        checkDate(request);
+
+        if (StateAction.SEND_TO_REVIEW == request.getStateAction()) {
+            event.setState(State.PENDING);
         }
+        if (StateAction.CANCEL_REVIEW == request.getStateAction()) {
+            event.setState(State.CANCELED);
+        }
+
+
         return EVENT_MAPPER.toEventFullDto(eventRepository.save(updateEvent(event, request)));
     }
 
     private Event updateEvent(Event event, UpdateEventRequest request) {
-        if (request.getAnnotation() != null) {
-            if (request.getAnnotation().length() <= 2000 && request.getAnnotation().length() >= 20) {
-                event.setAnnotation(request.getAnnotation());
-            } else {
-                throw new ValidationException("Can't be shorter than 20 and longer than 2000");
-            }
-        }
-        if (request.getCategory() != null) {
-            event.setCategory(checkExistence.getCategory(request.getCategory()));
-        }
-        if (request.getDescription() != null) {
-            if (request.getDescription().length() <= 7000 && request.getDescription().length() >= 20) {
-                event.setDescription(request.getDescription());
-            } else {
-                throw new ValidationException("Can't be shorter than 20 and longer than 7000");
-            }
-        }
-        if (request.getLocation() != null) {
-            event.setLocation(locationRepository.save(request.getLocation()));
-        }
-        if (request.getPaid() != null) {
-            event.setPaid(request.getPaid());
-        }
-        if (request.getParticipantLimit() != null) {
-            event.setParticipantLimit(request.getParticipantLimit());
-        }
-        if (request.getRequestModeration() != null) {
-            event.setRequestModeration(request.getRequestModeration());
-        }
-        if (request.getTitle() != null) {
-            if (request.getTitle().length() >= 3 && request.getTitle().length() <= 120) {
-                event.setTitle(request.getTitle());
-            } else {
-                throw new ValidationException("Can't be shorter than 3х and longer than 120");
-            }
-        }
-        return event;
+        return constructEvent(event, request);
     }
 
     private List<Event> setViewsAndConfirmedRequests(List<Event> events) {
@@ -324,5 +267,85 @@ public class EventServiceImpl implements EventService {
 
     private Long getEventIdFromURI(ViewStats viewStats) {
         return Long.parseLong(viewStats.getUri().substring(viewStats.getUri().lastIndexOf("/") + 1));
+    }
+
+    private void checkStartTime(LocalDateTime time) {
+        if (LocalDateTime.now().isAfter(time)) {
+            throw new ValidationException("Start must be before the end");
+        }
+    }
+
+    private void checkDate(UpdateEventRequest request) {
+        if (request.getEventDate() == null || request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationException("Datetime of the event must be in two hours from now");
+        }
+    }
+
+    private void checkEventStatus(Event event, UpdateEventRequest request, List<State> allowedState) {
+        for (State state : allowedState) {
+            if (event.getState() != state) {
+                throw new ConflictException(String.format("Event can be published only from %s status", allowedState) +
+                        request.getStateAction());
+            }
+        }
+    }
+
+    private void checkEventOwner(Event event, User user) {
+
+        if (!event.getInitiator().equals(user)) {
+            throw new NotFoundException(String.format("User %s not the owner of the event %d",
+                    user.getName(), event.getId()));
+        }
+    }
+
+    private void checkDescription(UpdateEventRequest request) {
+        if (!(request.getDescription().length() <= 7000 && request.getDescription().length() >= 20)) {
+            throw new ValidationException("Can't be shorter than 20 and longer than 7000");
+        }
+    }
+
+    private void checkAnnotaion(UpdateEventRequest request) {
+        if (request.getAnnotation().length() <= 2000 && request.getAnnotation().length() >= 20) {
+            throw new ValidationException("Can't be shorter than 20 and longer than 2000");
+        }
+    }
+
+    private void checkTitle(UpdateEventRequest request) {
+        if (request.getTitle().length() >= 3 && request.getTitle().length() <= 120) {
+            throw new ValidationException("Can't be shorter than 3 and longer than 120");
+        }
+    }
+
+    private Event constructEvent(Event event, UpdateEventRequest request) {
+
+        if (request.getAnnotation() != null) {
+            checkAnnotaion(request);
+            event.setAnnotation(request.getAnnotation());
+        }
+
+        if (request.getCategory() != null) {
+            event.setCategory(checkExistence.getCategory(request.getCategory()));
+        }
+        if (request.getDescription() != null) {
+            checkDescription(request);
+            event.setDescription(request.getDescription());
+        }
+        if (request.getLocation() != null) {
+            event.setLocation(locationRepository.save(request.getLocation()));
+        }
+        if (request.getPaid() != null) {
+            event.setPaid(request.getPaid());
+        }
+        if (request.getParticipantLimit() != null) {
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+        if (request.getRequestModeration() != null) {
+            event.setRequestModeration(request.getRequestModeration());
+        }
+        if (request.getTitle() != null) {
+            checkTitle(request);
+            event.setTitle(request.getTitle());
+        }
+        return event;
     }
 }
