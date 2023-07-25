@@ -86,7 +86,9 @@ public class EventServiceImpl implements EventService {
         if (request.getEventDate() != null) {
             if (LocalDateTime.now().isAfter(request.getEventDate())) {
                 throw new ValidationException("Start must be before the end");
-            } else event.setEventDate(request.getEventDate());
+            } else {
+                event.setEventDate(request.getEventDate());
+            }
         }
         if (request.getStateAction() != null) {
             if (request.getStateAction() == StateAction.PUBLISH_EVENT) {
@@ -126,8 +128,13 @@ public class EventServiceImpl implements EventService {
         if (rangeEnd == null) {
             rangeEnd = LocalDateTime.now().plusYears(5);
         }
+
         checkExistence.checkDateTime(rangeStart, rangeEnd);
-        if (text == null) text = "";
+
+        if (text == null) {
+            text = "";
+        }
+
         List<Event> events = eventRepository.findByParamsOrderByDate(
                 text.toLowerCase(),
                 List.of(State.PUBLISHED),
@@ -140,8 +147,10 @@ public class EventServiceImpl implements EventService {
         statsClient.postHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
         List<Event> eventList = setViewsAndConfirmedRequests(events);
 
-        if (sort != null && sort.equals(VIEWS))
+        if (sort != null && sort.equals(VIEWS)) {
             eventList.sort((e1, e2) -> e2.getViews().compareTo(e1.getViews()));
+        }
+
         if (onlyAvailable) {
             return eventList.stream()
                     .filter(event -> event.getParticipantLimit() <= event.getConfirmedRequests())
@@ -158,9 +167,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto findEventById(Long id, HttpServletRequest request) {
         Event event = checkExistence.checkEvent(id);
+
         if (event.getState() != State.PUBLISHED) {
             throw new NotFoundException(String.format("Event %d is not published", event.getId()));
         }
+
         statsClient.postHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
         List<ViewStats> viewStatsList = statsClient.getStats(List.of(id), true);
         long hits = viewStatsList
@@ -186,9 +197,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto addEventByUser(Long userId, NewEventDto newEventDto) {
         User user = checkExistence.checkUser(userId);
+
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
+
         Event event = EVENT_MAPPER.toEvent(newEventDto);
         event.setState(State.PENDING);
         event.setCreatedOn(LocalDateTime.now());
@@ -210,6 +223,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException(String.format("User %s not the owner of the event %d",
                     user.getName(), event.getId()));
         }
+
         return EVENT_MAPPER.toEventFullDto(event);
     }
 
