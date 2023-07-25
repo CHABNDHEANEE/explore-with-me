@@ -276,7 +276,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDate(UpdateEventRequest request) {
-        if (request.getEventDate() == null || request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
+        if (!request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
     }
