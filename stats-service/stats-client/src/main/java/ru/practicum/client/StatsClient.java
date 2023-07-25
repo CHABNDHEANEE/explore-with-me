@@ -49,7 +49,6 @@ public class StatsClient {
                 "unique", unique
         );
         return rest.exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}", HttpMethod.GET,
-                null, new ParameterizedTypeReference<List<ViewStats>>() {
-                }, parameters).getBody();
+                null, new ParameterizedTypeReference<List<ViewStats>>() {}, parameters).getBody();
     }
 }
