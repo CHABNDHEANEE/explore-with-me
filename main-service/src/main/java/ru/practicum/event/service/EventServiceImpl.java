@@ -282,11 +282,16 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkEventStatus(Event event, UpdateEventRequest request, List<State> allowedState) {
+        boolean valid = false;
         for (State state : allowedState) {
-            if (event.getState() != state) {
-                throw new ConflictException(String.format("Event can be published only from %s status", allowedState) +
-                        request.getStateAction());
+            if (event.getState() == state) {
+                valid = true;
+                break;
             }
+        }
+        if (!valid) {
+            throw new ConflictException(String.format("Event can be published only from %s status", allowedState) +
+                    request.getStateAction());
         }
     }
 
