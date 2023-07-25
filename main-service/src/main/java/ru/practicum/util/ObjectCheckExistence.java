@@ -27,37 +27,37 @@ public class ObjectCheckExistence {
     private final RequestRepository requestRepository;
     private final CompilationRepository compilationRepository;
 
-    public Event checkEvent(Long id) {
+    public Event getEvent(Long id) {
         return eventRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Event %d not found", id))
         );
     }
 
-    public User checkUser(Long id) {
+    public User getUser(Long id) {
         return userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("User с id %d not found", id))
         );
     }
 
-    public Category checkCategory(Long id) {
+    public Category getCategory(Long id) {
         return categoryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Category с id %d not found", id))
         );
     }
 
-    public ParticipationRequest checkRequest(Long id) {
+    public ParticipationRequest getRequest(Long id) {
         return requestRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Request id %d not found", id))
         );
     }
 
-    public Compilation checkCompilation(Long id) {
+    public Compilation getCompilation(Long id) {
         return compilationRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Compilation id %d not found", id))
         );
     }
 
-    public void checkDateTime(LocalDateTime start, LocalDateTime end) {
+    public void getDateTime(LocalDateTime start, LocalDateTime end) {
         if (start.isAfter(end)) {
             throw new ValidationException("Start can't be after the end");
         }

@@ -35,17 +35,16 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> findByRequestorId(Long userId) {
-        User user = checkExistence.checkUser(userId);
+        User user = checkExistence.getUser(userId);
         return requestRepository.findAllByRequester(user).stream()
                 .map(REQUEST_MAPPER::toParticipationRequestDto)
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
-        User user = checkExistence.checkUser(userId);
-        Event event = checkExistence.checkEvent(eventId);
+        User user = checkExistence.getUser(userId);
+        Event event = checkExistence.getEvent(eventId);
 
         ParticipationRequest request = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
@@ -82,8 +81,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        User user = checkExistence.checkUser(userId);
-        ParticipationRequest request = checkExistence.checkRequest(requestId);
+        User user = checkExistence.getUser(userId);
+        ParticipationRequest request = checkExistence.getRequest(requestId);
         if (!request.getRequester().equals(user)) {
             throw new ConflictException("You can canceled only your request");
         }
@@ -93,8 +92,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getRequestsEventByUser(Long userId, Long eventId) {
-        User user = checkExistence.checkUser(userId);
-        Event event = checkExistence.checkEvent(eventId);
+        User user = checkExistence.getUser(userId);
+        Event event = checkExistence.getEvent(eventId);
 
         if (!event.getInitiator().equals(user)) {
             throw new ValidationException("Only initiator can accept the request");
@@ -110,8 +109,8 @@ public class RequestServiceImpl implements RequestService {
                                                                Long eventId,
                                                                EventRequestStatusUpdateRequest updateRequest) {
 
-        User user = checkExistence.checkUser(userId);
-        Event event = checkExistence.checkEvent(eventId);
+        User user = checkExistence.getUser(userId);
+        Event event = checkExistence.getEvent(eventId);
 
         if (!event.getInitiator().equals(user)) {
             throw new ValidationException("Only initiator can accept the request");

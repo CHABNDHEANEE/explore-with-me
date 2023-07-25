@@ -66,7 +66,7 @@ public class EventServiceImpl implements EventService {
         if (rangeEnd == null) {
             rangeEnd = LocalDateTime.now().plusYears(5);
         }
-        checkExistence.checkDateTime(rangeStart, rangeEnd);
+        checkExistence.getDateTime(rangeStart, rangeEnd);
         List<Event> events = eventRepository.findByParams(
                 users,
                 states,
@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest request) {
-        Event event = checkExistence.checkEvent(eventId);
+        Event event = checkExistence.getEvent(eventId);
         if (request.getEventDate() != null) {
             if (LocalDateTime.now().isAfter(request.getEventDate())) {
                 throw new ValidationException("Start must be before the end");
@@ -129,7 +129,7 @@ public class EventServiceImpl implements EventService {
             rangeEnd = LocalDateTime.now().plusYears(5);
         }
 
-        checkExistence.checkDateTime(rangeStart, rangeEnd);
+        checkExistence.getDateTime(rangeStart, rangeEnd);
 
         if (text == null) {
             text = "";
@@ -166,7 +166,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventFullDto findEventById(Long id, HttpServletRequest request) {
-        Event event = checkExistence.checkEvent(id);
+        Event event = checkExistence.getEvent(id);
 
         if (event.getState() != State.PUBLISHED) {
             throw new NotFoundException(String.format("Event %d is not published", event.getId()));
@@ -187,7 +187,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> findAllEventsByUser(Long userId, Pageable pageable) {
-        checkExistence.checkUser(userId);
+        checkExistence.getUser(userId);
         return eventRepository.findAllByInitiatorId(userId, pageable)
                 .stream()
                 .map(EVENT_MAPPER::toEventFullDto)
@@ -196,7 +196,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto addEventByUser(Long userId, NewEventDto newEventDto) {
-        User user = checkExistence.checkUser(userId);
+        User user = checkExistence.getUser(userId);
 
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
@@ -207,7 +207,7 @@ public class EventServiceImpl implements EventService {
         event.setCreatedOn(LocalDateTime.now());
         event.setConfirmedRequests(0L);
 
-        Category category = checkExistence.checkCategory(newEventDto.getCategory());
+        Category category = checkExistence.getCategory(newEventDto.getCategory());
 
         event.setCategory(category);
         event.setInitiator(user);
@@ -216,8 +216,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto findEventByUser(Long userId, Long eventId) {
-        Event event = checkExistence.checkEvent(eventId);
-        User user = checkExistence.checkUser(userId);
+        Event event = checkExistence.getEvent(eventId);
+        User user = checkExistence.getUser(userId);
 
         if (!event.getInitiator().equals(user)) {
             throw new NotFoundException(String.format("User %s not the owner of the event %d",
@@ -259,7 +259,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         if (request.getCategory() != null) {
-            event.setCategory(checkExistence.checkCategory(request.getCategory()));
+            event.setCategory(checkExistence.getCategory(request.getCategory()));
         }
         if (request.getDescription() != null) {
             if (request.getDescription().length() <= 7000 && request.getDescription().length() >= 20) {

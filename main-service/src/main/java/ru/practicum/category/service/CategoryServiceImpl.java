@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements ru.practicum.category.service.Catego
 
     @Override
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
-        Category category = checkExistence.checkCategory(catId);
+        Category category = checkExistence.getCategory(catId);
         Optional<Category> cat = categoryRepository.findByName(newCategoryDto.getName());
         if (cat.isPresent() && !category.getName().equals(newCategoryDto.getName())) {
             throw new ConflictException(String.format("Category %s already exists",
@@ -53,7 +53,7 @@ public class CategoryServiceImpl implements ru.practicum.category.service.Catego
         if (!eventRepository.findAllByCategoryId(catId).isEmpty()) {
             throw new ConflictException("You can't delete category with linked events");
         }
-        checkExistence.checkCategory(catId);
+        checkExistence.getCategory(catId);
         categoryRepository.deleteById(catId);
     }
 
@@ -67,6 +67,6 @@ public class CategoryServiceImpl implements ru.practicum.category.service.Catego
 
     @Override
     public CategoryDto getCategoryById(Long catId) {
-        return CATEGORY_MAPPER.toCategoryDto(checkExistence.checkCategory(catId));
+        return CATEGORY_MAPPER.toCategoryDto(checkExistence.getCategory(catId));
     }
 }

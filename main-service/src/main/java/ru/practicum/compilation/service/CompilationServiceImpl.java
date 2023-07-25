@@ -42,13 +42,13 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void deleteCompilationByAdmin(Long compId) {
-        checkExistence.checkCompilation(compId);
+        checkExistence.getCompilation(compId);
         compilationRepository.deleteById(compId);
     }
 
     @Override
     public CompilationDto updateCompilationByAdmin(Long compId, UpdateCompilationRequest request) {
-        Compilation compilation = checkExistence.checkCompilation(compId);
+        Compilation compilation = checkExistence.getCompilation(compId);
         if (request.getEvents() != null) {
             compilation.setEvents(eventRepository.findAllByIdIn(request.getEvents()));
         }
@@ -78,6 +78,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto findCompilationById(Long compId) {
-        return COMPILATION_MAPPER.toCompilationDto(checkExistence.checkCompilation(compId));
+        return COMPILATION_MAPPER.toCompilationDto(checkExistence.getCompilation(compId));
     }
 }

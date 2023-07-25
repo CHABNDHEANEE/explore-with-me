@@ -50,7 +50,7 @@ public class UserServiceImpl implements ru.practicum.user.service.UserService {
 
     @Override
     public void deleteUser(Long userId) {
-        checkExistence.checkUser(userId);
+        checkExistence.getUser(userId);
         repository.deleteById(userId);
     }
 }
