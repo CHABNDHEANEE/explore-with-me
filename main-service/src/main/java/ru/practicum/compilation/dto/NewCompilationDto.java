@@ -20,7 +20,7 @@ public class NewCompilationDto {
 
     @NotBlank
     @NotNull
-    @Size(min = 1, max = 50, message = "Размер наименования подборки: min = 1, max = 50")
+    @Size(min = 1, max = 50)
     private String title;
 
 }
