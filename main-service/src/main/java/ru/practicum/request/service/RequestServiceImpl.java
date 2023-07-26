@@ -1,6 +1,7 @@
 package ru.practicum.request.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
@@ -19,6 +20,7 @@ import ru.practicum.util.ObjectCheckExistence;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ import static ru.practicum.request.mapper.RequestMapper.REQUEST_MAPPER;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
@@ -118,7 +121,9 @@ public class RequestServiceImpl implements RequestService {
         User user = checkExistence.getUser(userId);
         Event event = checkExistence.getEvent(eventId);
 
-        if (!event.getInitiator().equals(user)) {
+        if (!Objects.equals(event.getInitiator().getId(), user.getId())) {
+            log.info(String.format("Throwing error: accept owner: %d, current user: %d",
+                    event.getInitiator().getId(), user.getId()));
             throw new ValidationException("Only initiator can accept the request");
         }
         if (event.getParticipantLimit() <= event.getConfirmedRequests() && event.getParticipantLimit() != 0) {
@@ -131,12 +136,13 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Events not found");
         }
 
-        if (updateRequest.getStatus().equals(CONFIRMED)) {
-            return updateConfirmedStatus(requestList, event);
-        } else if (updateRequest.getStatus().equals(REJECTED)) {
-            return updateRejectedStatus(requestList);
-        } else {
-            throw new ValidationException("Некорректный статус");
+        switch (updateRequest.getStatus()) {
+            case CONFIRMED:
+                return updateConfirmedStatus(requestList, event);
+            case REJECTED:
+                return updateRejectedStatus(requestList);
+            default:
+                throw new ValidationException("Incorrect status");
         }
     }
 
