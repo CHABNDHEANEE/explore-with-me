@@ -38,7 +38,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
         Category category = checkExistence.getCategory(catId);
         Optional<Category> cat = categoryRepository.findByName(newCategoryDto.getName());

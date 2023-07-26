@@ -37,13 +37,13 @@ public class ObjectCheckExistence {
 
     public User getUser(Long id) {
         return userRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("User с id %d not found", id))
+                () -> new NotFoundException(String.format("User id %d not found", id))
         );
     }
 
     public Category getCategory(Long id) {
         return categoryRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Category с id %d not found", id))
+                () -> new NotFoundException(String.format("Category id %d not found", id))
         );
     }
 
