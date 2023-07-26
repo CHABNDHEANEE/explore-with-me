@@ -285,10 +285,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDate(UpdateEventRequest request) {
-        if (request == null) {
-            return;
-        }
-        if (!request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
+        if ((request != null && request.getEventDate() != null) &&
+                !request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
     }
@@ -316,7 +314,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDescription(UpdateEventRequest request) {
-        if (request.getDescription().length() > DESCRIPTION_MAX || request.getDescription().length() > DESCRIPTION_MIN) {
+        if (request.getDescription().length() > DESCRIPTION_MAX || request.getDescription().length() < DESCRIPTION_MIN) {
             throw new ValidationException("Can't be shorter than " + DESCRIPTION_MIN + " and longer than " + DESCRIPTION_MAX);
         }
     }
