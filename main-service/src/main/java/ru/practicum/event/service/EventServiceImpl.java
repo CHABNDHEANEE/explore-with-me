@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
                                                      HttpServletRequest request) {
 
         rangeStart = rangeStart == null ? LocalDateTime.now() : rangeStart;
-        rangeEnd = rangeEnd == null ? LocalDateTime.now() : rangeEnd;
+        rangeEnd = rangeEnd == null ? LocalDateTime.MAX : rangeEnd;
         text = text == null ? "" : text;
 
         checkExistence.getDateTime(rangeStart, rangeEnd);
