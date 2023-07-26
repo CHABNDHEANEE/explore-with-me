@@ -2,12 +2,14 @@ package ru.practicum.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.request.model.ParticipationRequest;
@@ -60,6 +62,13 @@ public class ObjectCheckExistence {
     public void getDateTime(LocalDateTime start, LocalDateTime end) {
         if (start.isAfter(end)) {
             throw new ValidationException("Start can't be after the end");
+        }
+    }
+
+    public void checkCategoryExistence(NewCategoryDto category) {
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new ConflictException(String.format("Category %s already exists",
+                    category.getName()));
         }
     }
 }

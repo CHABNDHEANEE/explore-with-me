@@ -41,6 +41,7 @@ public class EventServiceImpl implements EventService {
     private static final int ANNOTATION_MIN = 20;
     private static final int TITLE_MAX = 120;
     private static final int TITLE_MIN = 3;
+    private static final String APP_NAME = "ewm-main-service";
 
 
     private final EventRepository eventRepository;
@@ -123,7 +124,7 @@ public class EventServiceImpl implements EventService {
                                                      HttpServletRequest request) {
 
         rangeStart = rangeStart == null ? LocalDateTime.now() : rangeStart;
-        rangeEnd = rangeEnd == null ? LocalDateTime.MAX : rangeEnd;
+        rangeEnd = rangeEnd == null ? LocalDateTime.now().plusYears(15) : rangeEnd;
         text = text == null ? "" : text;
 
         checkExistence.getDateTime(rangeStart, rangeEnd);
@@ -137,7 +138,7 @@ public class EventServiceImpl implements EventService {
                 rangeEnd,
                 pageable);
 
-        statsClient.postHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
         List<Event> eventList = setViewsAndConfirmedRequests(events);
 
         if (sort != null && sort.equals(VIEWS)) {
@@ -165,7 +166,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException(String.format("Event %d is not published", event.getId()));
         }
 
-        statsClient.postHit("ewm-main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
         List<ViewStats> viewStatsList = statsClient.getStats(List.of(id), true);
         long hits = viewStatsList
                 .stream()
