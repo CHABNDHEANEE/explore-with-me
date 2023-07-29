@@ -35,6 +35,7 @@ import static ru.practicum.event.mapper.EventMapper.EVENT_MAPPER;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
 
+    private static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
     private static final int DESCRIPTION_MAX = 7000;
     private static final int DESCRIPTION_MIN = 20;
     private static final int ANNOTATION_MAX = 2000;
@@ -68,8 +69,8 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
-        rangeStart = rangeStart == null ? LocalDateTime.now().minusYears(5) : rangeStart;
-        rangeEnd = rangeEnd == null ? LocalDateTime.now().plusYears(5) : rangeEnd;
+        rangeStart = rangeStart == null ? CURRENT_TIME.minusYears(5) : rangeStart;
+        rangeEnd = rangeEnd == null ? CURRENT_TIME.plusYears(5) : rangeEnd;
 
         checkExistence.getDateTime(rangeStart, rangeEnd);
         List<Event> events = eventRepository.findByParams(
@@ -103,7 +104,7 @@ public class EventServiceImpl implements EventService {
                 case PUBLISH_EVENT:
                     checkEventStatus(event, request, List.of(State.PENDING));
                     event.setState(State.PUBLISHED);
-                    event.setPublishedOn(LocalDateTime.now());
+                    event.setPublishedOn(CURRENT_TIME);
                     break;
             }
         }
@@ -123,8 +124,8 @@ public class EventServiceImpl implements EventService {
                                                      Pageable pageable,
                                                      HttpServletRequest request) {
 
-        rangeStart = rangeStart == null ? LocalDateTime.now() : rangeStart;
-        rangeEnd = rangeEnd == null ? LocalDateTime.now().plusYears(15) : rangeEnd;
+        rangeStart = rangeStart == null ? CURRENT_TIME : rangeStart;
+        rangeEnd = rangeEnd == null ? CURRENT_TIME.plusYears(15) : rangeEnd;
         text = text == null ? "" : text;
 
         checkExistence.getDateTime(rangeStart, rangeEnd);
@@ -138,7 +139,7 @@ public class EventServiceImpl implements EventService {
                 rangeEnd,
                 pageable);
 
-        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), CURRENT_TIME);
         List<Event> eventList = setViewsAndConfirmedRequests(events);
 
         if (sort != null && sort.equals(VIEWS)) {
@@ -166,7 +167,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException(String.format("Event %d is not published", event.getId()));
         }
 
-        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        statsClient.postHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr(), CURRENT_TIME);
         List<ViewStats> viewStatsList = statsClient.getStats(List.of(id), true);
         long hits = viewStatsList
                 .stream()
@@ -193,13 +194,13 @@ public class EventServiceImpl implements EventService {
     public EventFullDto addEventByUser(Long userId, NewEventDto newEventDto) {
         User user = checkExistence.getUser(userId);
 
-        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+        if (newEventDto.getEventDate().isBefore(CURRENT_TIME.plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
 
         Event event = EVENT_MAPPER.toEvent(newEventDto);
         event.setState(State.PENDING);
-        event.setCreatedOn(LocalDateTime.now());
+        event.setCreatedOn(CURRENT_TIME);
         event.setConfirmedRequests(0L);
 
         Category category = checkExistence.getCategory(newEventDto.getCategory());
@@ -280,14 +281,14 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkStartTime(LocalDateTime time) {
-        if (LocalDateTime.now().isAfter(time)) {
+        if (CURRENT_TIME.isAfter(time)) {
             throw new ValidationException("Start must be before the end");
         }
     }
 
     private void checkDate(UpdateEventRequest request) {
         if ((request != null && request.getEventDate() != null) &&
-                !request.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
+                !request.getEventDate().isAfter(CURRENT_TIME.plusHours(2))) {
             throw new ValidationException("Datetime of the event must be in two hours from now");
         }
     }
