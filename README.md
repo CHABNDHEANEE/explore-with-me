@@ -26,5 +26,6 @@ Backend социальная сеть-афиша.
 
 Доступ к данным осуществляется через JdbcTemplate с нативными SQL-запросами.
 
-PR: https://github.com/CHABNDHEANEE/explore-with-me/pull/2
 REPO: https://github.com/CHABNDHEANEE/explore-with-me
+
+PR: https://github.com/CHABNDHEANEE/explore-with-me/pull/2
