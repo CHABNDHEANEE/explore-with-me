@@ -177,6 +177,7 @@ public class EventServiceImpl implements EventService {
         event.setViews(hits + 1);
         event.setConfirmedRequests((long) requestRepository.findAllByEventIdInAndStatus(List.of(id),
                 RequestStatus.CONFIRMED).size());
+        event.setComments(checkExistence.getCommentsCount(id));
         return EVENT_MAPPER.toEventFullDto(eventRepository.save(event));
     }
 
